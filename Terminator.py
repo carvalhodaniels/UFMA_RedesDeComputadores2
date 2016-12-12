@@ -7,7 +7,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect the socket to the port where the server is listening
 try:
-    server_address = ('localhost', 10028)
+    server_address = ('localhost', 10051)
     print >> sys.stderr, 'connecting to %s port %s' % server_address
     sock.connect(server_address)
 except:
@@ -108,7 +108,7 @@ def visualCompromisso():
     amount_expected = len("VISUALIZAR")
 
     while amount_received < amount_expected:
-        data = sock.recv(1024)
+        data = sock.recv(32000)
         amount_received += len(data)
 
     print data
