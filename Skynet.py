@@ -77,8 +77,7 @@ def lerUsuario():
 def esperandoConexao():
    #while True:
        # Esperando por conexão
-       print >>sys.stderr, 'Esperando conexao'
-       connection, client_address = sock.accept()
+       
        try:
            print >> sys.stderr, 'Conexao de', client_address
 
@@ -136,7 +135,7 @@ lerCompromisso()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # "Colocando" socket na porta
-server_address = ('localhost', 10000)
+server_address = ('localhost', 10003)
 print >>sys.stderr, 'iniciando em %s na porta %s' % server_address
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(server_address)
@@ -144,8 +143,10 @@ sock.bind(server_address)
 # Ouvindo na porta
 sock.listen(1)
 
-#while True:
-t1 = threading.Thread(target = esperandoConexao, args = [])
-t1.start()
-t1.join()
+while True:
+   print >>sys.stderr, 'Esperando conexao'
+   connection, client_address = sock.accept()
+   t1 = threading.Thread(target = esperandoConexao, args = [])
+   t1.start()
+#t1.join()
 
