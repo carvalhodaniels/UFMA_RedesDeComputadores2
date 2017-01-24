@@ -1,6 +1,7 @@
 import threading
 import socket
 import sys
+import time
 import mysql.connector
 
 compromissos = []
@@ -50,16 +51,12 @@ def salvaCompromisso(login,data1):
 
    c = conn.cursor()
    c.execute("INSERT INTO compromisso(data, descricao) VALUES (STR_TO_DATE('%s','%%d/%%m/%%Y %%H:%%i'),'%s')" % (date, descricao))
+   c.execute("INSERT INTO compromisso_conta VALUES ("\
+      "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1),"\
+      "(SELECT idcompromisso FROM compromisso WHERE data = (STR_TO_DATE('%s','%%d/%%m/%%Y %%H:%%i')) LIMIT 1))" % (login, date))
    # Salva (commit) as mudanças
    conn.commit()
 
-   compromissos.append(make_compromisso(date,descricao,login))
-   arquivo = open('compromisso.txt', 'r')
-   comps = arquivo.readlines()
-   comps.append("\n"+ date +","+ descricao +","+ login)
-   arquivo = open('compromisso.txt', 'w')
-   arquivo.writelines(comps)
-   arquivo.close()
 
 def lerCompromisso():
    arquivo = open('compromisso.txt', 'r')
@@ -120,6 +117,9 @@ def esperandoConexao():
                        salvaCompromisso(atual,data)
                        connection.sendall("SALVO")
                    if(data.find("VISUALIZAR") > -1):
+                       #c = conn.cursor()
+                       #c.execute("SELECT data,descricao FROM comprimisso WHERE idcompromisso = '%s'" % (atual))
+                       #print c.fetchone()
                        visu = []
                        gambis = ""
                        print len(compromissos)
@@ -137,6 +137,12 @@ def esperandoConexao():
            connection.close()
            return
 
+atual = "dsc"
+c = conn.cursor()
+c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso = "\
+          "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
+          "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
+print c.fetchone()
 
 lerUsuario()
 lerCompromisso()
@@ -147,7 +153,7 @@ lerCompromisso()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # "Colocando" socket na porta
-server_address = ('localhost', 10006)
+server_address = ('localhost', 10000)
 print >>sys.stderr, 'iniciando em %s na porta %s' % server_address
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(server_address)
@@ -160,5 +166,4 @@ while True:
    connection, client_address = sock.accept()
    t1 = threading.Thread(target = esperandoConexao, args = [])
    t1.start()
-#t1.join()
 
