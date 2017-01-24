@@ -7,7 +7,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect the socket to the port where the server is listening
 try:
-    server_address = ('localhost', 10003)
+    server_address = ('localhost', 10006)
     print >> sys.stderr, 'connecting to %s port %s' % server_address
     sock.connect(server_address)
 except:
@@ -64,12 +64,12 @@ def menu():
 def marcaCompromisso():
     dataerr = -1
     while dataerr != 0:
-        print "Insira a data para marcar o compromisso (DD/MM/AAAA DESCRICAO):"
+        print "Insira a data para marcar o compromisso (DD/MM/AAAA HH:MN DESCRICAO):"
         date = str(raw_input(': '))
         checkdia = date[0:2]
         checkmes = date[3:5]
         checkano = date[6:10]
-        print date[0:10]
+        #print date[0:10]
         if int(checkano) < 2016:
             print "Ano impossivel\n"
         else:

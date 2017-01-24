@@ -1,10 +1,13 @@
 import threading
 import socket
 import sys
+import mysql.connector
 
 compromissos = []
 usuarios = []
 atual = ""
+conn = mysql.connector.Connect(host='127.0.0.1',user='skynet',\
+                        password='t-800',database='skynetdb')
 
 #DEFINE O USUARIO
 class user:
@@ -42,8 +45,14 @@ def make_compromisso(date,descricao,login):
 
 def salvaCompromisso(login,data1):
    data = data1[12:]                      #12 é o tamanho de "COMPROMISSO "
-   date = data[0:10]                      #10 é o tamanho da data
-   descricao = data[11:len(data)]         #o resto é a descricao 
+   date = data[0:16]                      #10 é o tamanho da data
+   descricao = data[17:len(data)]         #o resto é a descricao
+
+   c = conn.cursor()
+   c.execute("INSERT INTO compromisso(data, descricao) VALUES (STR_TO_DATE('%s','%%d/%%m/%%Y %%H:%%i'),'%s')" % (date, descricao))
+   # Salva (commit) as mudanças
+   conn.commit()
+
    compromissos.append(make_compromisso(date,descricao,login))
    arquivo = open('compromisso.txt', 'r')
    comps = arquivo.readlines()
@@ -93,17 +102,19 @@ def esperandoConexao():
                            senha = data[separator+1:]
                            print login
                            print senha
-                           for i in range(len(usuarios)):
-                               if usuarios[i].login == login:
-                                   if usuarios[i].senha == senha:
-                                       atual = login
-                                       connection.sendall("VALIDUSER")
+
+                           # Inicializa
+                           c = conn.cursor()
+                           c.execute("SELECT * FROM conta WHERE login = '%s' AND password = '%s'" % (login, senha))
+                           t = c.fetchone()
+                           #print t
+
+                           if t is not None:
+                              atual = login
+                              connection.sendall("VALIDUSER")
                                        
-                                   else:
-                                       connection.sendall("INVALIDUSER")
-                                       
-                               else:
-                                   connection.sendall("INVALIDUSER")
+                           else:
+                              connection.sendall("INVALIDUSER")
                                    
                    if(data.find("COMPROMISSO") != -1):
                        salvaCompromisso(atual,data)
@@ -126,6 +137,7 @@ def esperandoConexao():
            connection.close()
            return
 
+
 lerUsuario()
 lerCompromisso()
 #usuarios.append(make_user("alex", ['localhost',10005], "alex","alex"))
@@ -135,7 +147,7 @@ lerCompromisso()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # "Colocando" socket na porta
-server_address = ('localhost', 10003)
+server_address = ('localhost', 10006)
 print >>sys.stderr, 'iniciando em %s na porta %s' % server_address
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(server_address)
