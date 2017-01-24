@@ -117,16 +117,18 @@ def esperandoConexao():
                        salvaCompromisso(atual,data)
                        connection.sendall("SALVO")
                    if(data.find("VISUALIZAR") > -1):
-                       #c = conn.cursor()
-                       #c.execute("SELECT data,descricao FROM comprimisso WHERE idcompromisso = '%s'" % (atual))
-                       #print c.fetchone()
-                       visu = []
-                       gambis = ""
-                       print len(compromissos)
-                       for i in range(len(compromissos)):
-                           if compromissos[i].login == atual:
-                               gambis = gambis + compromissos[i].date + "-" + compromissos[i].descricao + "\n"
-                       connection.sendall(gambis)         
+                       c = conn.cursor()
+                       c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso = "\
+                           "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
+                           "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
+                       #print c.fetchall()
+                       #visu = []
+                       #gambis = ""
+                       #print len(compromissos)
+                       #for i in range(len(compromissos)):
+                       #    if compromissos[i].login == atual:
+                       #        gambis = gambis + compromissos[i].date + "-" + compromissos[i].descricao + "\n"
+                       connection.sendall(c.fetchall())         
                        
                else:
                    print >> sys.stderr, 'Sem mais dados de', client_address
@@ -137,12 +139,6 @@ def esperandoConexao():
            connection.close()
            return
 
-atual = "dsc"
-c = conn.cursor()
-c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso = "\
-          "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
-          "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
-print c.fetchone()
 
 lerUsuario()
 lerCompromisso()
