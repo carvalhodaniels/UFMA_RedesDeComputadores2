@@ -7,7 +7,7 @@ sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Connect the socket to the port where the server is listening
 try:
-    server_address = ('localhost', 10004)
+    server_address = ('localhost', 10005)
     print >> sys.stderr, 'connecting to %s port %s' % server_address
     sock.connect(server_address)
 except:
@@ -35,7 +35,12 @@ def login():
             amount_received += len(data)
             if data == "VALIDUSER":
                 print "Login realizado com sucesso\n"
+                listaConvite = []
                 loginerr = 0
+                convite = sock.recv(32000)
+                while convite != "None" : 
+                    listaConvite.append(convite)
+                print convite    
             elif data == "INVALIDUSER":
                 print "Login ou senha invalidos\n"
 
@@ -95,13 +100,24 @@ def marcaCompromisso():
     # Look for the response
     amount_received = 0
     amount_expected = len("SALVO")
-
+    
     while amount_received < amount_expected:
         data = sock.recv(1024)
         amount_received += len(data)
         print >> sys.stderr, 'received "%s"' % data
-
-
+    print ("Insira as pessoas a serem convidadas separadas por / e vazio para nao convidar ninguem:")
+    convites = raw_input(': ')
+    sock.sendall(convites)
+    
+    amount_received = 0
+    amount_expected = len("CONVIDADO")
+    
+    while amount_received < amount_expected:
+        data = sock.recv(1024)
+        amount_received += len(data)
+        print >> sys.stderr, 'received "%s"' % data
+    
+    
 def visualCompromisso():
     sock.sendall("VISUALIZAR")
     amount_received = 0

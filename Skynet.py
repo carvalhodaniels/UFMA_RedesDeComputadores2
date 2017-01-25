@@ -7,8 +7,8 @@ import mysql.connector
 compromissos = []
 usuarios = []
 atual = ""
-conn = mysql.connector.Connect(host='127.0.0.1',user='skynet',\
-                        password='t-800',database='skynetdb')
+conn = mysql.connector.Connect(host='127.0.0.1',user='root',\
+                        password='',database='skynetdb')
 
 #DEFINE O USUARIO
 class user:
@@ -53,7 +53,7 @@ def salvaCompromisso(login,data1):
    c.execute("INSERT INTO compromisso(data, descricao) VALUES (STR_TO_DATE('%s','%%d/%%m/%%Y %%H:%%i'),'%s')" % (date, descricao))
    c.execute("INSERT INTO compromisso_conta VALUES ("\
       "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1),"\
-      "(SELECT idcompromisso FROM compromisso WHERE data = (STR_TO_DATE('%s','%%d/%%m/%%Y %%H:%%i')) LIMIT 1))" % (login, date))
+      "(SELECT idcompromisso FROM compromisso WHERE data = (STR_TO_DATE('%s','%%d/%%m/%%Y %%H:%%i')) LIMIT 1), 1)" % (login, date))
    # Salva (commit) as mudanças
    conn.commit()
 
@@ -79,7 +79,18 @@ def lerUsuario():
    userList.append(user[2])
    usuarios.append(make_user(user[0],userList,user[3],user[4]))
 
-
+def mandarConvites(convites,data1):
+   print "Teste"
+   c = conn.cursor()
+   data = data1[12:]                      #12 é o tamanho de "COMPROMISSO "
+   date = data[0:16]                      #10 é o tamanho da data
+   for i in range(len(convites)):
+      c.execute("INSERT INTO compromisso_conta VALUES ("\
+      "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1),"\
+      "(SELECT idcompromisso FROM compromisso WHERE data = (STR_TO_DATE('%s','%%d/%%m/%%Y %%H:%%i')) LIMIT 1), 0)" % (convites[i], date))
+   # Salva (commit) as mudanças
+      conn.commit()
+         
 def esperandoConexao():
    #while True:
        # Esperando por conexÃ£o
@@ -109,21 +120,43 @@ def esperandoConexao():
                            if t is not None:
                               atual = login
                               connection.sendall("VALIDUSER")
-                                       
+                              c = conn.cursor()
+                              c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
+                              "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
+                              "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
+                              convite = c.fetchone()
+                              while convite is not None:
+                                 connection.sendall(str(convite))      
+                                 resposta = connection.recv(32000)
+                                 if(resposta == "YES"):
+                                    c.execute("UPDATE compromisso_conta SET status = 1 WHERE status = 0 AND idconta = "\
+                                    "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1) LIMIT 1" % (atual))
+                                    c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
+                                    "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
+                                    "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
+                                    convite = c.fetchone()
+                                    print convite
+                                    if convite == None:
+                                       connection.sendall("1")
+                                       print "teste"
                            else:
                               connection.sendall("INVALIDUSER")
                                    
                    if(data.find("COMPROMISSO") != -1):
                        salvaCompromisso(atual,data)
                        connection.sendall("SALVO")
+                       newdata = connection.recv(32000)
+                       convites = newdata.split('/')
+                       mandarConvites(convites,data)
+                       connection.sendall("CONVIDADO")
                    if(data.find("VISUALIZAR") > -1):
                        c = conn.cursor()
                        c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
                            "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
                            "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
-                       sucesso = str(c.fetchall())
-                       print sucesso
-                       connection.sendall(sucesso)
+                       ar = str([[str(item) for item in results] for results in c.fetchall()])
+                       connection.sendall(ar)
+                  
                        
                else:
                    print >> sys.stderr, 'Sem mais dados de', client_address
@@ -143,7 +176,7 @@ lerCompromisso()
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # "Colocando" socket na porta
-server_address = ('localhost', 10004)
+server_address = ('localhost', 10005)
 print >>sys.stderr, 'iniciando em %s na porta %s' % server_address
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(server_address)
