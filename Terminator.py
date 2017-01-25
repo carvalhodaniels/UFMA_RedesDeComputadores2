@@ -37,18 +37,37 @@ def login():
                 print "Login realizado com sucesso\n"
                 loginerr = 0
                 convite = sock.recv(32000)
-                print convite    
+                if(convite != "[]"):
+                    print "Voce gostaria de participar do seguinte evento? (S/N)"
+                    print convite
+                    anwser = raw_input("")
+                    if(anwser == "S"):
+                        sock.sendall("ACEITAR");
+                    else:
+                        sock.sendall("RECUSAR");
+                
             elif data == "INVALIDUSER":
                 print "Login ou senha invalidos\n"
 
+def confirmaCompromisso():
+    sock.sendall("CONFIRMAR")
+    convite = sock.recv(32000)
+    print "Voce gostaria de participar do seguinte evento? (S/N)"
+    print convite
+    anwser = raw_input("")
+    if(anwser == "S"):
+        sock.sendall("ACEITAR");
+    else:
+        sock.sendall("RECUSAR");
 
 def menu():
     opt = 1
-    while opt != 3:
+    while opt != 4:
         print "Interface Usuário:\n" \
               "1. Marcar Compromisso\n" \
               "2. Visualizar Compromissos\n" \
-              "3. Sair\n"
+              "3. Confirmar um Compromisso\n" \
+              "4. Sair\n"
         while True:
             try:
                 opt = int(raw_input(': '))  # recebe a opção
@@ -60,6 +79,8 @@ def menu():
         elif opt == 2:
             visualCompromisso()
         elif opt == 3:
+            confirmaCompromisso()
+        elif opt == 4:
             sock.close()
 
 
