@@ -118,17 +118,12 @@ def esperandoConexao():
                        connection.sendall("SALVO")
                    if(data.find("VISUALIZAR") > -1):
                        c = conn.cursor()
-                       c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso = "\
+                       c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
                            "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
                            "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
-                       #print c.fetchall()
-                       #visu = []
-                       #gambis = ""
-                       #print len(compromissos)
-                       #for i in range(len(compromissos)):
-                       #    if compromissos[i].login == atual:
-                       #        gambis = gambis + compromissos[i].date + "-" + compromissos[i].descricao + "\n"
-                       connection.sendall(c.fetchall())         
+                       sucesso = str(c.fetchall())
+                       print sucesso
+                       connection.sendall(sucesso)
                        
                else:
                    print >> sys.stderr, 'Sem mais dados de', client_address
@@ -142,14 +137,13 @@ def esperandoConexao():
 
 lerUsuario()
 lerCompromisso()
-#usuarios.append(make_user("alex", ['localhost',10005], "alex","alex"))
 
 
 # Criando socket  TCP/IP
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # "Colocando" socket na porta
-server_address = ('localhost', 10000)
+server_address = ('localhost', 10004)
 print >>sys.stderr, 'iniciando em %s na porta %s' % server_address
 sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 sock.bind(server_address)

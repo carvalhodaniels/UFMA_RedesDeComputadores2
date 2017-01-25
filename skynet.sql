@@ -23,7 +23,7 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `skynetdb`.`compromisso` (
   `idcompromisso` INT NOT NULL AUTO_INCREMENT,
-  `data` DATE NOT NULL DEFAULT '00-00-0000 00:00',
+  `data` datetime NOT NULL DEFAULT '00-00-0000 00:00',
   `descricao` TEXT NOT NULL,
   PRIMARY KEY (`idcompromisso`))
 ENGINE = InnoDB;
