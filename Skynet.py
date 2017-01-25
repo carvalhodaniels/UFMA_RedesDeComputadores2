@@ -124,21 +124,8 @@ def esperandoConexao():
                               c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
                               "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
                               "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
-                              convite = c.fetchone()
-                              while convite is not None:
-                                 connection.sendall(str(convite))      
-                                 resposta = connection.recv(32000)
-                                 if(resposta == "YES"):
-                                    c.execute("UPDATE compromisso_conta SET status = 1 WHERE status = 0 AND idconta = "\
-                                    "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1) LIMIT 1" % (atual))
-                                    c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
-                                    "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
-                                    "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
-                                    convite = c.fetchone()
-                                    print convite
-                                    if convite == None:
-                                       connection.sendall("1")
-                                       print "teste"
+                              convite = c.fetchall()
+                              connection.sendall(str(convite))
                            else:
                               connection.sendall("INVALIDUSER")
                                    
@@ -152,11 +139,15 @@ def esperandoConexao():
                    if(data.find("VISUALIZAR") > -1):
                        c = conn.cursor()
                        c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
-                           "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
-                           "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
+                       "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
+                       "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
                        ar = str([[str(item) for item in results] for results in c.fetchall()])
                        connection.sendall(ar)
-                  
+                   if(data.find("PENDENTE") > -1):
+                      c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
+                      "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
+                      "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
+                   
                        
                else:
                    print >> sys.stderr, 'Sem mais dados de', client_address

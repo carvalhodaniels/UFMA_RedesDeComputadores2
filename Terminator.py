@@ -35,11 +35,8 @@ def login():
             amount_received += len(data)
             if data == "VALIDUSER":
                 print "Login realizado com sucesso\n"
-                listaConvite = []
                 loginerr = 0
                 convite = sock.recv(32000)
-                while convite != "None" : 
-                    listaConvite.append(convite)
                 print convite    
             elif data == "INVALIDUSER":
                 print "Login ou senha invalidos\n"
