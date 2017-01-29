@@ -16,6 +16,26 @@ except:
     sys.exit(0)
 cont = 0
 
+def convite():
+    sock.sendall("PENDENTE")
+    convite = sock.recv(32000)
+    convite = str(convite)
+    convite = convite.split(', [')
+    convitefim = []
+    for i in range (len(convite)):
+        convite1 = []
+        convite1 = convite[i].replace("[", "")
+        convite1 = convite1.replace("]", "")
+        convitefim.append(convite1)
+        resposta = []
+    for i in range(len(convitefim)):
+        print "Voce gostaria de participar do seguinte evento: ", convitefim[i], "(S/N)?"
+        valor = str(raw_input(": "))
+        if valor == "s" or valor == "S":
+            resposta.append("1")
+        else:
+            resposta.append("2")
+    sock.sendall("RESPOSTA " + str(resposta))
 
 def login():
     loginerr = -1
@@ -36,38 +56,18 @@ def login():
             if data == "VALIDUSER":
                 print "Login realizado com sucesso\n"
                 loginerr = 0
-                convite = sock.recv(32000)
-                if(convite != "[]"):
-                    print "Voce gostaria de participar do seguinte evento? (S/N)"
-                    print convite
-                    anwser = raw_input("")
-                    if(anwser == "S"):
-                        sock.sendall("ACEITAR");
-                    else:
-                        sock.sendall("RECUSAR");
-                
+                convite()
             elif data == "INVALIDUSER":
                 print "Login ou senha invalidos\n"
 
-def confirmaCompromisso():
-    sock.sendall("CONFIRMAR")
-    convite = sock.recv(32000)
-    print "Voce gostaria de participar do seguinte evento? (S/N)"
-    print convite
-    anwser = raw_input("")
-    if(anwser == "S"):
-        sock.sendall("ACEITAR");
-    else:
-        sock.sendall("RECUSAR");
 
 def menu():
     opt = 1
-    while opt != 4:
+    while opt != 3:
         print "Interface Usuário:\n" \
               "1. Marcar Compromisso\n" \
               "2. Visualizar Compromissos\n" \
-              "3. Confirmar um Compromisso\n" \
-              "4. Sair\n"
+              "3. Sair\n"
         while True:
             try:
                 opt = int(raw_input(': '))  # recebe a opção
@@ -79,8 +79,6 @@ def menu():
         elif opt == 2:
             visualCompromisso()
         elif opt == 3:
-            confirmaCompromisso()
-        elif opt == 4:
             sock.close()
 
 

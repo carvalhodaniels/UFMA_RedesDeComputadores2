@@ -120,12 +120,6 @@ def esperandoConexao():
                            if t is not None:
                               atual = login
                               connection.sendall("VALIDUSER")
-                              c = conn.cursor()
-                              c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso = "\
-                              "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
-                              "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1) LIMIT 1)" % (atual))
-                              convite = c.fetchall()
-                              connection.sendall(str(convite))
                            else:
                               connection.sendall("INVALIDUSER")
                                    
@@ -139,27 +133,37 @@ def esperandoConexao():
                    if(data.find("VISUALIZAR") > -1):
                        c = conn.cursor()
                        c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
-                       "(SELECT idcompromisso FROM compromisso_conta WHERE status = 1 AND idconta = "\
+                       "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
                        "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
                        ar = str([[str(item) for item in results] for results in c.fetchall()])
                        connection.sendall(ar)
                    if(data.find("PENDENTE") > -1):
-                      c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
-                      "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
-                      "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
-                   if(data.find("CONFIRMAR") > -1):
+                       c = conn.cursor()
+                       c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
+                                 "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
+                                 "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
+                       ar = str([[str(item) for item in results] for results in c.fetchall()])
+                       connection.sendall(ar)
+                   if(data.find("RESPOSTA") > -1):
                       c = conn.cursor()
-                      c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso = "\
-                         "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
-                         "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1) LIMIT 1)" % (atual))
-                      convite = c.fetchall()
-                      connection.sendall(str(convite))
-                   if(data.find("ACEITAR") > -1):
-                      print "Compromisso aceito"
-                      c = conn.cursor()
-                      c.execute("UPDATE compromisso_conta SET status = 1 WHERE status = 0 AND idconta = "\
-                         "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1) LIMIT 1" % (atual))
-                      conn.commit()
+                      gambis = data[9:]
+                      atual = login
+                      agambis = gambis.split("\', \'")
+                      osgambis = []
+                      for i in range(len(agambis)):
+                         ogambis = agambis[i].replace("[", "")
+                         ogambis1 = ogambis.replace("]", "")
+                         ogambis2 = ogambis1.replace("'", "")
+                         osgambis.append(ogambis2)
+                         print osgambis
+                         print osgambis[0]
+                      for i in range(len(osgambis)):
+                         c.execute("UPDATE compromisso_conta SET status = '%s' WHERE status = 0 AND "\
+                                   "idconta = (SELECT idconta FROM conta WHERE login = '%s')" % (osgambis[i],atual))
+                         conn.commit()
+                         print "UPDATE compromisso_conta SET status =" + osgambis[i] +" WHERE status = 0 AND idconta = (SELECT idconta FROM conta WHERE login =" + atual+ ")"
+                      
+                      
                        
                else:
                    print >> sys.stderr, 'Sem mais dados de', client_address
@@ -173,6 +177,7 @@ def esperandoConexao():
 
 lerUsuario()
 lerCompromisso()
+c=conn.cursor()
 
 
 # Criando socket  TCP/IP
