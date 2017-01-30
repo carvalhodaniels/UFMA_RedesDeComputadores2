@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import threading
 import socket
 import sys
@@ -143,7 +144,10 @@ def esperandoConexao():
                                  "(SELECT idcompromisso FROM compromisso_conta WHERE status = 0 AND idconta = "\
                                  "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
                        ar = str([[str(item) for item in results] for results in c.fetchall()])
-                       connection.sendall(ar)
+                       if ar != "[]":
+                          connection.sendall(ar)
+                       else:
+                          connection.sendall("NADA")
                    if(data.find("RESPOSTA") > -1):
                       c = conn.cursor()
                       gambis = data[9:]

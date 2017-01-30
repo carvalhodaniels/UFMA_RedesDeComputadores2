@@ -1,4 +1,4 @@
-# coding=utf-8
+# -*- coding: utf-8 -*-
 import socket
 import sys
 
@@ -16,26 +16,31 @@ except:
     sys.exit(0)
 cont = 0
 
-def convite():
+def convite(f):
     sock.sendall("PENDENTE")
     convite = sock.recv(32000)
-    convite = str(convite)
-    convite = convite.split(', [')
-    convitefim = []
-    for i in range (len(convite)):
-        convite1 = []
-        convite1 = convite[i].replace("[", "")
-        convite1 = convite1.replace("]", "")
-        convitefim.append(convite1)
-        resposta = []
-    for i in range(len(convitefim)):
-        print "Voce gostaria de participar do seguinte evento: ", convitefim[i], "(S/N)?"
-        valor = str(raw_input(": "))
-        if valor == "s" or valor == "S":
-            resposta.append("1")
-        else:
-            resposta.append("2")
-    sock.sendall("RESPOSTA " + str(resposta))
+    if convite != "NADA":
+        convite = str(convite)
+        convite = convite.split(', [')
+        convitefim = []
+        for i in range (len(convite)):
+            convite1 = []
+            convite1 = convite[i].replace("[", "")
+            convite1 = convite1.replace("]", "")
+            convitefim.append(convite1)
+            resposta = []
+        for i in range(len(convitefim)):
+            print "Voce gostaria de participar do seguinte evento: ", convitefim[i], "(S/N)?"
+            valor = str(raw_input(": "))
+            if valor == "s" or valor == "S":
+                resposta.append("1")
+            else:
+                resposta.append("2")
+        sock.sendall("RESPOSTA " + str(resposta))
+    else:
+        if f == "s":
+            print "Nao ha nenhum convite a aceitar."
+        
 
 def login():
     loginerr = -1
@@ -56,7 +61,7 @@ def login():
             if data == "VALIDUSER":
                 print "Login realizado com sucesso\n"
                 loginerr = 0
-                convite()
+                convite("n")
             elif data == "INVALIDUSER":
                 print "Login ou senha invalidos\n"
 
@@ -80,7 +85,7 @@ def menu():
         elif opt == 2:
             visualCompromisso()
         elif opt == 3:
-            convite()
+            convite("s")
         elif opt == 4:
             sock.close()
 
