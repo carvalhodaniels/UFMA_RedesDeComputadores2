@@ -121,40 +121,36 @@ def marcaCompromisso():
 
     sock.sendall("COMPROMISSO " + date)
     # Look for the response
-    amount_received = 0
-    amount_expected = len("SALVO")
-    
-    while amount_received < amount_expected:
-        data = sock.recv(1024)
-        amount_received += len(data)
-        print >> sys.stderr, 'received "%s"' % data
-    print ("Insira as pessoas a serem convidadas separadas por / e 'ninguem' para nao convidar ninguem:")
-    convites = raw_input(': ')
-    
-    if(convites.find("ninguem") > -1):
-        sock.sendall('')
-    else:
-        sock.sendall(convites)
-        amount_received = 0
-        amount_expected = len("CONVIDADO")
-    
-        while amount_received < amount_expected:
-            data = sock.recv(1024)
-            amount_received += len(data)
-            print >> sys.stderr, 'received "%s"' % data
-    
+    resposta = sock.recv(1024)
+    if resposta.find("SALVO") > -1 :
+        
+        print ("Insira as pessoas a serem convidadas separadas por / e 'ninguem' para nao convidar ninguem:")
+        convites = raw_input(': ')
+        
+        if(convites.find("ninguem") > -1):
+            sock.sendall('')
+        else:
+            sock.sendall(convites)
+            amount_received = 0
+            amount_expected = len("CONVIDADO")
+        
+            while amount_received < amount_expected:
+                data = sock.recv(1024)
+                amount_received += len(data)
+                print >> sys.stderr, 'received "%s"' % data
+        
     
     
 def visualCompromisso():
     sock.sendall("VISUALIZAR")
     amount_received = 0
     amount_expected = len("VISUALIZAR")
-
-    while amount_received < amount_expected:
-        data = sock.recv(32000)
-        amount_received += len(data)
-
-    print data
+    compromisso = data = sock.recv(32000)
+        
+    if compromisso != "NADA":    
+        print data
+    else:
+        print "Sem compromissos cadastrados para essa conta." 
 
 
 login()

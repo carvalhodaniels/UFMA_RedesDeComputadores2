@@ -137,7 +137,10 @@ def esperandoConexao():
                        "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
                        "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
                        ar = str([[str(item) for item in results] for results in c.fetchall()])
-                       connection.sendall(ar)
+                       if ar != "[]":
+                          connection.sendall(ar)
+                       else:
+                          connection.sendall("NADA")
                        
                    if(data.find("PENDENTE") > -1):
                        c = conn.cursor()
@@ -179,8 +182,8 @@ def esperandoConexao():
            return
 
 
-lerUsuario()
-lerCompromisso()
+#lerUsuario()
+#lerCompromisso()
 c=conn.cursor()
 
 
