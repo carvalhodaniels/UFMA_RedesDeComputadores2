@@ -16,6 +16,7 @@ except:
     sys.exit(0)
 cont = 0
 
+# 
 def convite(f):
     sock.sendall("PENDENTE")
     convite = sock.recv(32000)
