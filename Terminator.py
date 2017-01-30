@@ -16,7 +16,7 @@ except:
     sys.exit(0)
 cont = 0
 
-# Perunta se há convites não respondios
+# Pergunta se há convites não respondios
 def convite(f):
     sock.sendall("PENDENTE")
     convite = sock.recv(32000)
@@ -37,8 +37,10 @@ def convite(f):
             valor = str(raw_input(": "))
             if valor == "s" or valor == "S":
                 resposta.append("1")
+                print "Evento aceito com sucesso"
             else:
                 resposta.append("2")
+                print "Evento recusado com sucesso"
         sock.sendall("RESPOSTA " + str(resposta))
     else:
         if f == "s":
@@ -62,17 +64,17 @@ def login():
             data = sock.recv(1024)
             amount_received += len(data)
             if data == "VALIDUSER":
-                print "Login realizado com sucesso\n"
+                print "Login realizado com sucesso"
                 loginerr = 0
                 convite("n")
             elif data == "INVALIDUSER":
-                print "Login ou senha invalidos\n"
+                print "Login ou senha invalidos"
 
 # Menu!
 def menu():
     opt = 1
     while opt != 4:
-        print "Interface Usuário:\n" \
+        print "\nInterface Usuário:\n" \
               "1. Marcar Compromisso\n" \
               "2. Visualizar Compromissos\n" \
               "3. Aceitar Convites\n" \
@@ -101,7 +103,8 @@ def marcaCompromisso():
         checkdia = date[0:2]
         checkmes = date[3:5]
         checkano = date[6:10]
-        if int(checkano) < 2016:
+        #checar se ano, mes e dia é válido
+        if int(checkano) < 2017:
             print "Ano impossivel\n"
         else:
             if int(checkmes) > 12 or int(checkmes) < 0:
@@ -141,18 +144,27 @@ def marcaCompromisso():
             while amount_received < amount_expected:
                 data = sock.recv(1024)
                 amount_received += len(data)
-                print >> sys.stderr, 'received "%s"' % data
+                if data == "CONVIDADO":
+                    print "Convidado com sucesso!"
         
     
 # Visualiza os compromissos do usuário
 def visualCompromisso():
     sock.sendall("VISUALIZAR")
-    amount_received = 0
-    amount_expected = len("VISUALIZAR")
     compromisso = data = sock.recv(32000)
         
-    if compromisso != "NADA":    
-        print data
+    if compromisso != "NADA":
+        #separa a variavel data onde há "], [" em um vetor
+        gambis = data.split("], [")
+        osgambis = []
+        for i in range(len(gambis)):
+            #substitui os colchetes por nada
+            ogambis = gambis[i].replace("[", "")
+            ogambis1 = ogambis.replace("]", "")
+            osgambis.append(ogambis1)
+        for i in range(len(osgambis)):
+            print osgambis[i]
+        
     else:
         print "Sem compromissos cadastrados para essa conta." 
 

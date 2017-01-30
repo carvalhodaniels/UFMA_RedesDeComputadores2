@@ -114,7 +114,7 @@ def esperandoConexao():
                        c = conn.cursor()
                        c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
                        "(SELECT idcompromisso FROM compromisso_conta WHERE idconta = "\
-                       "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
+                       "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1)) ORDER BY data" % (atual))
                        ar = str([[str(item) for item in results] for results in c.fetchall()])
                        if ar != "[]":
                           connection.sendall(ar)
@@ -136,20 +136,21 @@ def esperandoConexao():
                    # Recebe a resposta de um compromisso a ser confirmado ou não
                    if(data.find("RESPOSTA") > -1):
                       c = conn.cursor()
-                      gambis = data[9:]
+                      gambis = data[9:] # retira RESPOSTA da variavel data
                       atual = login
-                      agambis = gambis.split("\', \'")
+                      #divide a string em um vetor separando onde tem ', '
+                      agambis = gambis.split("\', \'") 
                       osgambis = []
                       for i in range(len(agambis)):
+                         #substitui os colchetes e aspas simples por nada
                          ogambis = agambis[i].replace("[", "")
                          ogambis1 = ogambis.replace("]", "")
                          ogambis2 = ogambis1.replace("'", "")
-                         osgambis.append(ogambis2)
+                         osgambis.append(ogambis2) # insere tudo em um vetor
                       for i in range(len(osgambis)):
                          c.execute("UPDATE compromisso_conta SET status = '%s' WHERE status = 0 AND "\
                                    "idconta = (SELECT idconta FROM conta WHERE login = '%s')" % (osgambis[i],atual))
                          conn.commit()
-                         print "UPDATE compromisso_conta SET status =" + osgambis[i] +" WHERE status = 0 AND idconta = (SELECT idconta FROM conta WHERE login =" + atual+ ")"
 
                else:
                    print >> sys.stderr, 'Sem mais dados de', client_address
