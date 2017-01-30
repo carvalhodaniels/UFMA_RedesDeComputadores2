@@ -63,11 +63,12 @@ def login():
 
 def menu():
     opt = 1
-    while opt != 3:
+    while opt != 4:
         print "Interface Usuário:\n" \
               "1. Marcar Compromisso\n" \
               "2. Visualizar Compromissos\n" \
-              "3. Sair\n"
+              "3. Aceitar Convites\n" \
+              "4. Sair\n"
         while True:
             try:
                 opt = int(raw_input(': '))  # recebe a opção
@@ -79,6 +80,8 @@ def menu():
         elif opt == 2:
             visualCompromisso()
         elif opt == 3:
+            convite()
+        elif opt == 4:
             sock.close()
 
 
