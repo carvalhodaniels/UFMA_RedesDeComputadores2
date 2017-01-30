@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding=utf-8
 import socket
 import sys
 
@@ -40,7 +40,6 @@ def convite(f):
     else:
         if f == "s":
             print "Nao ha nenhum convite a aceitar."
-        
 
 def login():
     loginerr = -1
@@ -129,17 +128,21 @@ def marcaCompromisso():
         data = sock.recv(1024)
         amount_received += len(data)
         print >> sys.stderr, 'received "%s"' % data
-    print ("Insira as pessoas a serem convidadas separadas por / e vazio para nao convidar ninguem:")
+    print ("Insira as pessoas a serem convidadas separadas por / e 'ninguem' para nao convidar ninguem:")
     convites = raw_input(': ')
-    sock.sendall(convites)
     
-    amount_received = 0
-    amount_expected = len("CONVIDADO")
+    if(convites.find("ninguem") > -1):
+        sock.sendall('')
+    else:
+        sock.sendall(convites)
+        amount_received = 0
+        amount_expected = len("CONVIDADO")
     
-    while amount_received < amount_expected:
-        data = sock.recv(1024)
-        amount_received += len(data)
-        print >> sys.stderr, 'received "%s"' % data
+        while amount_received < amount_expected:
+            data = sock.recv(1024)
+            amount_received += len(data)
+            print >> sys.stderr, 'received "%s"' % data
+    
     
     
 def visualCompromisso():

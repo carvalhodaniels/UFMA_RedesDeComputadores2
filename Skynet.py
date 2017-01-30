@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import threading
 import socket
 import sys
@@ -131,6 +130,7 @@ def esperandoConexao():
                        convites = newdata.split('/')
                        mandarConvites(convites,data)
                        connection.sendall("CONVIDADO")
+                       
                    if(data.find("VISUALIZAR") > -1):
                        c = conn.cursor()
                        c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
@@ -138,6 +138,7 @@ def esperandoConexao():
                        "(SELECT idconta FROM conta WHERE login = '%s' LIMIT 1))" % (atual))
                        ar = str([[str(item) for item in results] for results in c.fetchall()])
                        connection.sendall(ar)
+                       
                    if(data.find("PENDENTE") > -1):
                        c = conn.cursor()
                        c.execute("SELECT DATE_FORMAT(data, '%%d/%%m/%%Y %%H:%%i'),descricao FROM compromisso WHERE idcompromisso IN "\
@@ -148,6 +149,7 @@ def esperandoConexao():
                           connection.sendall(ar)
                        else:
                           connection.sendall("NADA")
+                       
                    if(data.find("RESPOSTA") > -1):
                       c = conn.cursor()
                       gambis = data[9:]
@@ -166,9 +168,7 @@ def esperandoConexao():
                                    "idconta = (SELECT idconta FROM conta WHERE login = '%s')" % (osgambis[i],atual))
                          conn.commit()
                          print "UPDATE compromisso_conta SET status =" + osgambis[i] +" WHERE status = 0 AND idconta = (SELECT idconta FROM conta WHERE login =" + atual+ ")"
-                      
-                      
-                       
+
                else:
                    print >> sys.stderr, 'Sem mais dados de', client_address
                    break
@@ -199,6 +199,6 @@ sock.listen(1)
 while True:
    print >>sys.stderr, 'Esperando conexao'
    connection, client_address = sock.accept()
-   t1 = threading.Thread(target = esperandoConexao, args = [])
+   t1 = threading.Thread(target = esperandoConexao, args = []) 
    t1.start()
 
