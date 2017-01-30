@@ -16,11 +16,12 @@ except:
     sys.exit(0)
 cont = 0
 
-# 
+# Perunta se há convites não respondios
 def convite(f):
     sock.sendall("PENDENTE")
     convite = sock.recv(32000)
     if convite != "NADA":
+        # Trata a mensagem
         convite = str(convite)
         convite = convite.split(', [')
         convitefim = []
@@ -30,6 +31,7 @@ def convite(f):
             convite1 = convite1.replace("]", "")
             convitefim.append(convite1)
             resposta = []
+        # Percorre os convites
         for i in range(len(convitefim)):
             print "Voce gostaria de participar do seguinte evento: ", convitefim[i], "(S/N)?"
             valor = str(raw_input(": "))
@@ -42,6 +44,7 @@ def convite(f):
         if f == "s":
             print "Nao ha nenhum convite a aceitar."
 
+# Pede para realizar login
 def login():
     loginerr = -1
     while loginerr != 0:
@@ -65,7 +68,7 @@ def login():
             elif data == "INVALIDUSER":
                 print "Login ou senha invalidos\n"
 
-
+# Menu!
 def menu():
     opt = 1
     while opt != 4:
@@ -89,7 +92,7 @@ def menu():
         elif opt == 4:
             sock.close()
 
-
+# Pede para marcar um compromisso
 def marcaCompromisso():
     dataerr = -1
     while dataerr != 0:
@@ -98,7 +101,6 @@ def marcaCompromisso():
         checkdia = date[0:2]
         checkmes = date[3:5]
         checkano = date[6:10]
-        #print date[0:10]
         if int(checkano) < 2016:
             print "Ano impossivel\n"
         else:
@@ -119,12 +121,13 @@ def marcaCompromisso():
                     print checkdia + ": dia impossivel3\n"
                 else:
                     dataerr = 0
-
+    # Envia a mensagem
     sock.sendall("COMPROMISSO " + date)
     # Look for the response
     resposta = sock.recv(1024)
     if resposta.find("SALVO") > -1 :
-        
+
+        # Quer adicionar outro usuario ao compromisso?
         print ("Insira as pessoas a serem convidadas separadas por / e 'ninguem' para nao convidar ninguem:")
         convites = raw_input(': ')
         
@@ -141,7 +144,7 @@ def marcaCompromisso():
                 print >> sys.stderr, 'received "%s"' % data
         
     
-    
+# Visualiza os compromissos do usuário
 def visualCompromisso():
     sock.sendall("VISUALIZAR")
     amount_received = 0
